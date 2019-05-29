@@ -9,21 +9,22 @@
       position: relative;
       margin-top: 20px;
       width: 500px;
-      background: lightblue;
+      background: lightblue url("img/bg.jpg") no-repeat;
+      background-size:100% 100%;
       min-height: 900px;
       margin: 0 auto;
-      padding: 10px 25px
+      padding: 10px 25px;
     }
 
     .right {
       text-align: right;
-      color: green;
-      margin-top: 5px
+      color: white;
+      margin-top: 5px;
     }
 
     .left {
       text-align: left;
-      color: black;
+      color: peru;
       margin-top: 5px
     }
 
@@ -38,6 +39,7 @@
   <div id="connected"></div>
   <input type="text" id="inpt" value="">
   <button onclick="sendto()">发送</button>
+  <button onclick="closebtn()">关闭连接</button>
   <div id="con">
     <div id="content"></div>
   </div>
@@ -48,6 +50,12 @@
   var name = localStorage.getItem("name")
   var onOpen = function() {
     console.log("Socket opened.");
+    socket.send(JSON.stringify({
+      status: 0,
+      message: name + "进入了直播间",
+      name: '',
+      username:name
+    }))
   };
   var onClose = function() {
     console.log("Socket closed.");
@@ -67,19 +75,18 @@
       className = "top"
     }
 
-    document.getElementById("con").innerHTML += "<div class=" + className + ">" +
-      "<span style='font-size:12px'>" +
-      dataAll.name + "</span>" + "<br>" + dataAll.message + "</div>"
+    document.getElementById("con").innerHTML += "<div class=" + className + ">" + "<span style='font-size:12px;opacity:0.7;color:white'>" +
+      dataAll.name + "</span>" + "<br><span>" + dataAll.message + "</span></div>"
   };
   var onError = function() {
     console.log("We got an error.");
   };
-  var socket = new WebSocket("ws://10.4.0.14:9088");
+  var socket = new WebSocket("ws://10.4.0.14:9088/foo");
   socket.onopen = onOpen;
   socket.onclose = onClose;
   socket.onerror = onError;
   socket.onmessage = onMessage;
-
+  // 发送信息
   function sendto() {
     var valu = {
       name: name,
@@ -87,5 +94,9 @@
       status: 1
     }
     socket.send(JSON.stringify(valu));
+  }
+  // 关闭连接
+  function closebtn() {
+    socket.close()
   }
 </script>
