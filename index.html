@@ -1,0 +1,87 @@
+<!DOCTYPE HTML>  
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>websocket</title>  
+    <style type="text/css">
+        #con{
+          position: relative;
+          margin-top: 20px;
+          width: 500px;
+          background: lightblue;
+          min-height:900px;
+          margin: 0 auto;
+          padding: 10px 25px
+        }
+        .right{
+          text-align: right;
+          color: green;
+          margin-top: 5px
+        }
+        .left{
+          text-align: left  ;  
+          color:black ;
+          margin-top: 5px
+             }
+        .top{
+          text-align: center  ;  
+          color: red
+        }
+    </style>
+</head>
+<body>
+    <div id="connected"></div>
+    <input type="text" id="inpt" value="">
+      <button onclick="sendto()">发送</button>
+      <div id="con">
+        <div id="content"></div>
+      </div>
+    <script type="text/javascript">
+       var name=localStorage.getItem("name")
+        var onOpen = function() {
+                console.log("Socket opened.");
+                // socket.send("Hi, Server!");
+                console.log(socket.readyState)
+            },
+            onClose = function() {
+                console.log("Socket closed.");
+            },
+            onMessage = function(data) {
+                console.log("We get signal:");
+                console.log(data);
+                var className;
+                var dataAll=JSON.parse(data.data)
+                if(dataAll.status==1){
+                  if(dataAll.name==name){
+                    className="right"
+                  }else{
+                    className="left"
+                  }
+                }else{
+                  className="top"
+                }
+              
+              document.getElementById("con").innerHTML+="<div class="+className+">"+"<span style='font-size:12px'>"+dataAll.name+"</span>"+"<br>"+dataAll.message+"</div>"
+            },
+            onError = function() {
+                console.log("We got an error.");
+            },
+
+        socket = new WebSocket("ws://10.4.0.14:9088",[]);
+        socket.onopen = onOpen;
+        socket.onclose = onClose;
+        socket.onerror = onError;
+        socket.onmessage = onMessage;
+function sendto(){
+  var valu={
+    name:name,
+    message:document.getElementById("inpt").value,
+    status:1
+  }
+  socket.send(JSON.stringify(valu));
+}
+
+
+    </script>
+</body>
+</html>
