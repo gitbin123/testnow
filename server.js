@@ -3,11 +3,11 @@ var wss = new WebSocketServer({
   port: 9088
 });
 
-function heartbeat() {
-  this.isAlive = true;
-}
+// function heartbeat() {
+//   this.isAlive = true;
+// }
 
-function noop() {}
+// function noop() {}
 //有人访问这个接口就会调用
 wss.on('connection', function connection(ws, req) {
   // ws.isAlive = true;
