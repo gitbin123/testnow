@@ -1,0 +1,166 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>websocket</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css"
+    integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"
+    integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous">
+  </script>
+</head>
+<style>
+  body,
+  html {
+    height: 100%;
+  }
+
+  .tabbable {
+    width: 50%;
+    margin: 0 auto;
+    height: 100%;
+  }
+
+  .tab-content {
+    height: 80%;
+    background: lightslategray;
+    overflow: auto;
+    padding: 5px 15px
+  }
+
+  .navbar-inverse a {
+    color: white
+  }
+
+  .right {
+    text-align: right;
+    color: white;
+    margin-top: 5px;
+  }
+
+  .left {
+    text-align: left;
+    color: peru;
+    margin-top: 5px
+  }
+  ul li {
+    position: relative;
+  }
+  ul li span{
+    position: absolute;
+    right: 2px;
+    top: 0;
+    background: red;
+    border-radius: 100%;
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    text-align: center
+  }
+</style>
+
+<body>
+  <div class="tabbable">
+    <ul class="nav nav-tabs navbar-inverse">
+      <li class="active"><a href="#tab1" data-toggle="tab" onclick="check(1)" id="tabperson"></a></li>
+      <li><a href="#tab2" data-toggle="tab" onclick="check(2)" id="tabperson1">群聊</a></li>
+    </ul>
+    <div class="tab-content">
+      <div class="tab-pane active" id="tab1">
+      </div>
+      <div class="tab-pane" id="tab2">
+      </div>
+
+    </div>
+    <div>
+      <div class="input-group">
+        <input type="text" class="form-control" placeholder="Search for..." id="ipt">
+        <span class="input-group-btn">
+          <button class="btn btn-default" type="button" onclick="send()">发送</button>
+        </span>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+
+<script>
+  var num1=0
+  var num2=0
+  $("#tabperson").append(localStorage.getItem("sendName")+"好友")
+  var name = localStorage.getItem("name")
+  var className
+  var obj = {
+    name: name,
+    status: 1,
+    subID: 0,
+    sendName: localStorage.getItem("sendName")
+  }
+  // 按钮切换权限
+  function check(item) {
+    obj.sendName = localStorage.getItem("sendName")
+    obj.status = item
+    if(item==1){
+      num1=0
+      $("#tabperson span").remove()
+    }else{
+      num2=0
+      $("#tabperson1 span").remove()
+    }
+  }
+  // 发送消息
+  function send() {
+    obj.subID = 0
+    obj.message = $("#ipt").val()
+    var sendmessage = JSON.stringify(obj)
+    socket.send(sendmessage)
+    console.log($(".tab-content").height())
+  }
+
+  $("body").on("keydown",function(e){
+    if(e.keyCode==13){
+      send()
+    }
+  })
+
+  var socket = new WebSocket("ws://10.4.0.14:9088")
+  socket.onopen = function() {
+    // 告诉服务端是不是页面验证
+    obj.subID = 1
+    var str = JSON.stringify(obj)
+    socket.send(str)
+  }
+  socket.onmessage = function(data) {
+    let message = JSON.parse(data.data)
+    if (message.name == name) {
+      className = "right"
+    } else {
+      className = "left"
+    }
+    var userid; //界面元素插入数据
+    if (message.status == 1) {
+      userid = "#tab1"
+    } else {
+      userid = "#tab2"
+    }
+    
+    $(userid).append("<div class=" + className + ">" + "<span style='font-size:12px;opacity:0.7;color:white'>" +
+      message.name + "</span>" + "<br><span style='font-size:22px'>" + message.message + "</span></div>")
+    $(".tab-content").scrollTop($(userid).height())
+
+    // 判断当前的可视图在哪里
+    if(obj.status!=message.status){
+        if( userid == "#tab1"){
+          num1+=1
+          $("#tabperson").append("<span>"+num1+"</span>")
+        }else{
+          num2+=1
+          $("#tabperson1").append("<span>"+num2+"</span>")
+        }
+    }
+  }
+  socket.close = function() {}
+</script>
