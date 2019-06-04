@@ -1,0 +1,43 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>websocket</title>
+</head>
+
+<body>
+ <div>wss1服务在线人数:<span id="connected"></span></div> 
+ <div>wss2服务在线人数:<span id="connected2"></span></div> 
+</body>
+
+</html>
+<script type="text/javascript">
+// 获取url
+var url=window.location.href;
+url=url.split("?")[1];
+url=url.split("&")[0]
+url=url.split("=")[1]
+
+  var onOpen = function() {};
+  var onClose = function() {
+    console.log("Socket closed.");
+  };
+  var onMessage = function(data) {
+     var data=JSON.parse(data.data)
+     if(data.name=="wss1"){
+      document.getElementById("connected").innerText = data.line
+     }else{
+      document.getElementById("connected2").innerText = data.line
+  
+  };
+}
+  var onError = function() {
+    console.log("We got an error.");
+  };
+  var socket = new WebSocket("ws://10.4.0.14:9088/"+url);
+  socket.onopen = onOpen;
+  socket.onclose = onClose;
+  socket.onerror = onError;
+  socket.onmessage = onMessage;
+</script>
